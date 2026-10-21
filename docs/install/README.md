@@ -43,3 +43,5 @@ Otra vista general del módulo y las conexiones:
 ## Validación pendiente
 
 La última prueba del firmware indicó termocupla abierta. En las fotos no puede certificarse la continuidad de la termocupla ni que los conductores estén correctamente sujetos dentro de los bornes verdes. Con el USB desconectado, confirma que la termocupla esté insertada y apretada en los dos bornes marcados para termocupla y que los jumpers correspondan a las etiquetas de señal. No cortocircuites esos bornes ni intercambies conexiones por suposiciones.
+
+El ESP32-S3 se instalará dentro del gabinete y se informó acceso a los conectores externos de una fuente ATX de 850 W. El montaje del cooler de 12 V todavía no está realizado: revisar primero los requisitos eléctricos y pendientes en [`docs/cooler/cooler1.md`](../cooler/cooler1.md). La potencia nominal total de la fuente no sustituye la comprobación del riel, conector, cableado y driver concretos.

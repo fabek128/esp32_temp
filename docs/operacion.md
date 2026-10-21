@@ -30,3 +30,17 @@ Si la carga falla, vuelva a comprobar el puerto y el cable USB de datos. Para en
 En la prueba inicial se observó salida de arranque por USB y mensajes de termocupla abierta cada segundo durante más de 30 segundos. Esto confirma que el firmware corre y el puerto serie funciona, pero el módulo reporta D2=1: no hay una temperatura válida, por lo que no se informa ninguna medida. Con la alimentación desconectada, revise continuidad y asiento de la termocupla en los bornes del HW-550 y las conexiones de SO/CS/SCK/VCC/GND según la tabla acordada; no cambie GPIO ni puentee señales. Luego vuelva a conectar y reinicie para repetir la validación.
 
 El registro fotográfico de la instalación y el mapa de señales se encuentra en [`docs/install/README.md`](install/README.md). La documentación visual es referencia; confirma las etiquetas serigrafiadas antes de intervenir el cableado.
+
+La integración eléctrica, lista de componentes, curva inicial y pruebas progresivas del SST-FHS80X con ESP32-S3 se documentan en [`docs/cooler/control-esp32-s3.md`](cooler/control-esp32-s3.md), [`docs/cooler/componentes-circuito.md`](cooler/componentes-circuito.md) y [`docs/cooler/cooler1.md`](cooler/cooler1.md). El firmware ya genera PWM LEDC y mide tacómetro en GPIO asignados tentativamente. No se cargó ni probó con ventilador conectado; confirmar antes la placa/pinout y el cableado indicado en la guía.
+
+## Wi-Fi
+
+El firmware puede conectarse como estación Wi-Fi. `scripts/pio_wifi_env.py` busca primero las variables de entorno `WIFI_SSID` y `WIFI_PASSWORD`; si faltan, acepta en `.env` `WIFI_SSID`/`WIFI_PASSWORD` o las claves locales existentes `wifi_net`/`wifi_pass`. No imprime ni registra los valores. Si solo está definida una de las dos, el build falla.
+
+Para compilar con Wi-Fi, ejecuta `pio run -e esp32-s3-devkitc-1`; para cargar, añade el puerto identificado al comando de carga de arriba. El firmware informa estado y código de estado Wi-Fi, pero no SSID, contraseña ni dirección IP; reintenta la conexión sin bloquear el muestreo del MAX6675. Sin ambas variables, Wi-Fi queda desactivado. Con Arduino ESP32, `estado=3` indica conectado, `1` que no encuentra el SSID, `4` fallo de conexión, `5` conexión perdida y `6` desconectado/intentando.
+
+**Riesgo de credenciales:** para esta implementación las credenciales se incorporan como constantes en el firmware compilado. Cualquier persona con acceso de lectura al binario o acceso físico suficiente al dispositivo puede extraerlas; `.pio` está ignorado por Git, pero eso no protege contra extracción del chip o copias del binario. Usa una red IoT/de pruebas aislada, no una red corporativa o productiva. No compartas el firmware/binario. Como mínimo, limita `.env` al usuario (`chmod 600 .env`); el archivo local actual debe revisarse antes de usarlo. Para mayor protección futura, usa aprovisionamiento y almacenamiento seguro de credenciales en lugar de compilarlas en el firmware.
+
+### Resultado de la prueba Wi-Fi
+
+La carga se verificó y el muestreo MAX6675 siguió funcionando. La prueba serial reportó `estado=1` (`WL_NO_SSID_AVAIL`), por lo que **no se confirmó conexión Wi-Fi**. Esto suele indicar que el SSID configurado no se ve en la banda compatible de 2,4 GHz, está oculto/no disponible o no coincide con `wifi_net`; no se imprimieron el SSID ni la contraseña. Confirma localmente el nombre exacto de la red de 2,4 GHz y disponibilidad/visibilidad del punto de acceso, luego vuelve a compilar y cargar. No envíes las credenciales por chat.
